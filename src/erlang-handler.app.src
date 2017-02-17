@@ -1,0 +1,12 @@
+{application, erlang_handler,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { erlang_handler_app, []}},
+  {env, []}
+ ]}.
