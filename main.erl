@@ -10,70 +10,51 @@
 -author("semen").
 
 %% API
--export([hello_world/0, start/0]).
+-export([start/0]).
 %%%-on_load(init/0).
 
-hello_world() -> io:fwrite("hello, world\n").
-init() -> io:fwrite(start()).
+test(List) -> test(List, []).
 
-get_median_window(MedianWindow) ->
-  DefaultMedianWindow = 3,
-  case MedianWindow of
-    MedianWindow when MedianWindow < DefaultMedianWindow -> DefaultMedianWindow;
-    MedianWindow when MedianWindow rem 2 =:= 0 -> MedianWindow + 1;
-    _ -> MedianWindow
+test([], Result) -> Result;
+test([First, Next | List], Result) -> test(List, Result ++ [[First, Next]]).
+
+get_default_median_filter() -> 3.
+get_median_window(Window) ->
+  DefaultMedianWindow = get_default_median_filter(),
+  case Window of
+    Window when Window < DefaultMedianWindow -> DefaultMedianWindow;
+    Window when Window rem 2 =:= 0 -> Window + 1;
+    _ -> Window
   end.
 
-median_filter(Arr, MedianWindow) ->
-  CorrectMedianWindow = get_median_window(MedianWindow),
-  DiffMedian = (CorrectMedianWindow - 1) div 2,
-  SourceArray = lists:concat([
-    lists:sublist(Arr, 1, DiffMedian),
-    Arr,
-    lists:sublist(Arr, length(Arr) - DiffMedian, DiffMedian)
-  ]),
-  StartElementNumber = DiffMedian,
-  median_filter_run(SourceArray, DiffMedian, CorrectMedianWindow, StartElementNumber).
+median_filter(List) -> median_filter(List, get_default_median_filter()).
+median_filter(List, Window) ->
+  CorrectWindow = get_median_window(Window),
+  Diff = (CorrectWindow - 1) div 2,
+  SourceList =
+    lists:sublist(List, 1, Diff) ++
+    List ++
+    lists:sublist(List, length(List) - Diff, Diff),
+  StartIndex = Diff,
+  median_filter(SourceList, Diff, CorrectWindow, StartIndex).
 
-median_filter_run(Filtered, DiffMedian, _, ElementNumber)
-  when
-    (ElementNumber + DiffMedian) > length(Filtered)
-  -> lists:sublist(Filtered, DiffMedian + 1, length(Filtered) - DiffMedian - 1);
-median_filter_run(Filtered, DiffMedian, MedianWindow, ElementNumber)
-  when
-    (ElementNumber - DiffMedian) < 0;
-    (ElementNumber - DiffMedian) =:= 0
-  -> median_filter_run(Filtered, DiffMedian, MedianWindow, ElementNumber + 1);
-median_filter_run(Filtered, DiffMedian, MedianWindow, ElementNumber)
-  when
-    (ElementNumber - DiffMedian) > 0,
-    (ElementNumber + DiffMedian) =< length(Filtered)
-  ->
-  SubArray = lists:sublist(Filtered, ElementNumber - DiffMedian, MedianWindow),
-  SortedSubArray = lists:sort(fun (A, B) -> B < A end, SubArray),
+median_filter(List, Diff, _, Index) when (Index + Diff) > length(List) ->
+  lists:sublist(List, Diff + 1, length(List) - Diff - 1);
+median_filter(List, Diff, Window, Index) when (Index - Diff) < 0; (Index - Diff) =:= 0 ->
+  median_filter(List, Diff, Window, Index + 1);
+median_filter(List, Diff, Window, Index) when (Index - Diff) > 0, (Index + Diff) =< length(List) ->
+  SubList = lists:sublist(List, Index - Diff, Window),
+  SortedSubList = lists:sort(fun (Prev, Next) -> Next < Prev end, SubList),
 
-  NewFiltered = lists:append([
-    lists:sublist(Filtered, 1, ElementNumber - 1),
-    lists:sublist(SortedSubArray, DiffMedian + 1, 1),
-    lists:sublist(Filtered, ElementNumber + 1, length(Filtered) - ElementNumber)
-  ]),
-  median_filter_run(NewFiltered, DiffMedian, MedianWindow, ElementNumber + 1).
+  NewFiltered =
+    lists:sublist(List, 1, Index - 1) ++
+    lists:sublist(SortedSubList, Diff + 1, 1) ++
+    lists:sublist(List, Index + 1, length(List) - Index),
+  median_filter(NewFiltered, Diff, Window, Index + 1).
 
 start() ->
-  io:fwrite("start\n"),
-  Arr          = [0, 1, 80, 500, 4, 12654, 6, 7, 8, 9, 900],
-  MedianWindow = 3,
-  Filtered     = median_filter(Arr, MedianWindow),
-  io:fwrite("Arr: ~B, Filtered: ~B\n", [length(Arr), length(Filtered)]),
-  %%print_list(Filtered),
-  io:fwrite("~w~n\n", [Filtered]).
-
-print_list(List) ->
-  io:fwrite("List: ["),
-  print_list_next(List, 1),
-  io:fwrite("\]\n").
-
-print_list_next(List, N) when N =:= length(List) -> io:fwrite("~f", [lists:nth(N, List)]);
-print_list_next(List, N) when N < length(List) ->
-  io:fwrite("~f, ", [lists:nth(N, List)]),
-  print_list_next(List, N + 1).
+  Result = test([1,2,3,4,5,6,7,8]),
+  io:fwrite("~p~n", [Result]),
+  Result1 = median_filter([1, 2, 3, 100, 2, 50, 34, 10, 7, 8]),
+  io:fwrite("~p~n", [Result1])
+.

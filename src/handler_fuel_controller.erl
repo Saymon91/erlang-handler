@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 16. Февр. 2017 11:30
 %%%-------------------------------------------------------------------
--module(erlang_handler_fuel_controller).
+-module(handler_fuel_controller).
 -author("semen").
 
 %% API

@@ -1,4 +1,4 @@
--module(erlang_handler_app).
+-module(handler_app).
 
 -behaviour(application).
 
@@ -10,7 +10,7 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    erlang_handler_sup:start_link().
+  erlang_handler_sup:start_link().
 
 stop(_State) ->
-    ok.
+  ok.

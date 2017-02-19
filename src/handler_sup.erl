@@ -1,4 +1,4 @@
--module(erlang_handler_sup).
+-module(handler_sup).
 
 -behaviour(supervisor).
 
